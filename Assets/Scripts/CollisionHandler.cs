@@ -6,6 +6,15 @@ using UnityEngine.SceneManagement;
 public class CollisionHandler : MonoBehaviour
 {
     [SerializeField] float delayTime = 1f;
+    [SerializeField] AudioClip crashClip;
+    [SerializeField] AudioClip successClip;
+
+    AudioSource audioSource;
+
+    private void Start()
+    {
+        audioSource = GetComponent<AudioSource>();
+    }
     private void OnCollisionEnter(Collision other)
     {
         switch (other.gameObject.tag)
@@ -14,10 +23,7 @@ public class CollisionHandler : MonoBehaviour
                 Debug.Log("it's friendly");
                 break;
             case "Finish":
-                Invoke("LoadNextLevel", delayTime);
-                break;
-            case "Fuel":
-                Debug.Log("it's fuel");
+                StartSuccessSequence();
                 break;
             default:
                 StartCrashSequence();
@@ -25,10 +31,17 @@ public class CollisionHandler : MonoBehaviour
         }
     }
 
+    void StartSuccessSequence()
+    {
+        audioSource.PlayOneShot(successClip);
+        GetComponent<Movement>().enabled = false;
+        Invoke("LoadNextLevel", delayTime);
+    }
+
     void StartCrashSequence()
     {
-        // todo sound effect
         // todo particle effect
+        audioSource.PlayOneShot(crashClip);
         GetComponent<Movement>().enabled = false;
         Invoke("ReloadLevel", delayTime);
     }
