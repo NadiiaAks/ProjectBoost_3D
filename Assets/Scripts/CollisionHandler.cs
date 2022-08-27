@@ -9,14 +9,23 @@ public class CollisionHandler : MonoBehaviour
     [SerializeField] AudioClip crashClip;
     [SerializeField] AudioClip successClip;
 
+    [SerializeField] ParticleSystem crash;
+    [SerializeField] ParticleSystem success;
+
     AudioSource audioSource;
 
+    bool isTransitioning = false;
     private void Start()
     {
         audioSource = GetComponent<AudioSource>();
     }
     private void OnCollisionEnter(Collision other)
     {
+        if (isTransitioning)
+        {
+            return;
+        }
+
         switch (other.gameObject.tag)
         {
             case "Friendly":
@@ -33,6 +42,9 @@ public class CollisionHandler : MonoBehaviour
 
     void StartSuccessSequence()
     {
+        success.Play();
+        isTransitioning = true;
+        audioSource.Stop();
         audioSource.PlayOneShot(successClip);
         GetComponent<Movement>().enabled = false;
         Invoke("LoadNextLevel", delayTime);
@@ -40,7 +52,8 @@ public class CollisionHandler : MonoBehaviour
 
     void StartCrashSequence()
     {
-        // todo particle effect
+        crash.Play();
+        audioSource.Stop();
         audioSource.PlayOneShot(crashClip);
         GetComponent<Movement>().enabled = false;
         Invoke("ReloadLevel", delayTime);
